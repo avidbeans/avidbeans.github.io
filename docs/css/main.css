@@ -1,0 +1,10 @@
+/* Imports and things */
+@font-face {
+	font-family: "Fredericka-the-Great";
+	src: url("/docs/fonts/fredericka_the_great/frederickathegreat-regular.ttf");
+}
+
+body {margin: 0}
+p {margin: 0}
+
+#content {padding: 16px}

@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Bean Project</title>
+	<link href="/docs/css/main.css" rel="stylesheet" type="text/css">
+	<script src="/docs/js/jquery.js" type="text/javascript" defer></script>
+	<script src="/docs/js/main.js" type="text/javascript" defer></script>
+	<script src="/docs/js/calendar.js" type="text/javascript" defer></script>
+	<style>
+		#cover {position: fixed; width: 100vw; height: 100vh; background-color: #53BA5F; z-index: 1}
+		#cover p {position: absolute; color: #fff; font-family: sans-serif; font-size: 5vw; text-align: center; line-height: 100vh; width: 100vw; transition: 0.3s; animation: vertPend 1s ease infinite}
+		#cover.gone {animation: slideUp 1s ease 1s forwards}
+		#cover.gone p {transform: translateY(0)}
+		/* Calendar Styling */
+		#calendar {display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; grid-column-gap: 16px; grid-row-gap: 16px; width: 100%; height: 100%}
+		.day {display: flex; flex-direction: column; position: relative; border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); overflow: hidden; transition: 0.3s; cursor: pointer}
+		.day:hover {transform: scale(0.9); border-radius: 16px}
+		.day img {display: block; width: 100%}
+		.day .info {display: flex; flex-direction: column}
+		.day .info img {width: 32px}
+		.day .info p {flex-grow: 1; margin-left: 16px; font-family: "Fredericka-the-Great"; color: #fff; text-align: left; line-height: 32px}
+		.day .info > div {display: flex; padding: 4px; background-color: #53BA5F; transition: 0.3s}
+		.day .info > div:hover {background-color: #42984F}
+		.day .info .sun {border-bottom: 1px solid #42984F}
+		.day .date {padding: 0 8px; border-radius: 4px; position: absolute; right: 8px; top: 8px; background-color: rgba(0, 0, 0, 0.25)}
+		.day .dayCard {position: absolute; background-color: #53BA5F; top: 100%; bottom: 0px; left: 0px; right: 0px; transition: 0.3s}
+		.day .dayCard:hover {background-color: #42984F}
+		.day .dayCard p {position: absolute; font-size: 32px; font-family: "Fredericka-the-Great"; color: #fff; text-align: center; top: 25%; bottom: 0; left: 0; right: 0}
+		.day.showDate {transform: scale(0.9); border-radius: 50%}
+		.day.showDate .dayCard {top: 0}
+		/* Modal Styling */
+		.modal {position: fixed; left: 0; top: 100vh; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); transition: 1.5s ease; z-index: 1}
+		.modal p.closeButton {position: absolute; padding: 0 8px; border-radius: 4px; top: 2.5vh; right: 3.75vw; background-color: rgba(255, 85, 85, 0.9); font-size: 32px; color: #fff; font-family: sans-serif; cursor: pointer; transition: 0.3s}
+		.modal p.closeButton:hover {padding: 8px 16px; border-radius: 50%; background-color: #f55; right: 3.625vw}
+		.modal.show {transform: translateY(-100vh)}
+		.modal .modalContent {position: absolute; top: 5vh; left: 5vw; border-radius: 4px; width: 90vw; height: 90vh; background-color: #fff}
+		.modalContent .title {background-color: #53BA5F; padding: 16px; border-radius: 4px 4px 0 0; color: #fff; font-family: "Fredericka-the-Great"; font-size: 32px; transition: 0.3s}
+		.modalContent .title:hover {background-color: #42984F}
+		.modalInfo {display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr}
+		.modalInfo .img {padding: 16px; grid-column: 1; grid-row: 1 / 4;}
+		.modalInfo .img img {width: 100%; border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); transition: 0.3s}
+		.modalInfo .img:hover img {transform: scale(0.9); border-radius: 16px}
+		.modalInfo .img:hover p {color: #53BA5F}
+		.modalInfo .img p {text-align: center; font-family: "Fredericka-the-Great"; transition: 0.3s}
+		.modalInfo .table {grid-column: 2; grid-row: 1; padding: 16px;}
+		.modalInfo table {width: 100%; height: 100%; border-collapse: collapse; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25)}
+		.modalInfo table tr {background-color: #53BA5F; transition: 0.3s}
+		.modalInfo table tr:not(:last-child) {border-bottom: 1px solid #42984F}
+		.modalInfo table tr:hover {background-color: #42984F}
+		.modalInfo table td {padding: 8px; vertical-align: middle}
+		.modalInfo table img {position: relative; left: calc(50% - 48px)}
+		.modalInfo table p {font-family: "Fredericka-the-Great"; vertical-align: middle; font-size: 24px; color: #fff}
+		.modalInfo .notes {grid-column: 2; grid-row: 2; padding: 16px; font-family: "Fredericka-the-Great"}
+		.modalInfo .notes p {border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); padding: 16px}
+
+		@keyframes slideUp {
+			0% {top: 0}
+			100% {top: -100vh}
+		}
+
+		@keyframes vertPend {
+			0% {transform: translateY(-5vh)}
+			50% {transform: translateY(5vh)}
+			100% {transform: translateY(-5vh)}
+		}
+
+		@media only screen and (max-width: 1280px) {
+			#calendar {grid-template-columns: 1fr 1fr 1fr}
+		}
+	</style>
+</head>
+<body>
+	<div id="cover"><p>GROWING</p></div>
+	<nav></nav>
+	<div id="content">
+		<div id="calendar">
+			<div class="day" date="March 23" sunlight="Sun Time" water="Water Amount" onclick="flip(this)" name="Shree Rajesh Rajaram">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March23.jpg">
+				</div>
+				<div class="modal" nLight="Natural light time" aLight="Artificial light time" notes="Rajesh finally appeared above the soil. He's currently doing some yoga, but will stand tall soon enough.">
+				</div>
+			</div>
+			<div class="day" date="March 24" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March24.jpg">
+				</div>
+			</div>
+			<div class="day" date="March 25" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March25.jpg">
+				</div>
+			</div>
+			<div class="day" date="March 26" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March26.jpg">
+				</div>
+			</div>
+			<div class="day" date="March 27" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March27.jpg">
+				</div>
+			</div>
+			<div class="day" date="March 28" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March28.jpg">
+				</div>
+			</div>
+			<div class="day" date="March 29" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March29.jpg">
+				</div>
+			</div>
+			<div class="day" date="March 30" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March30.jpg">
+				</div>
+			</div>
+			<div class="day" date="Marach 31" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/March31.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 1" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April1.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 2" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April2.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 3" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April3.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 4" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April4.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 5" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April5.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 6" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April6.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 7" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April7.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 8" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April8.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 9" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April9.jpg">
+				</div>
+			</div>
+			<div class="day" date="April 10" sunlight="Sun Time" water="Water Amount" onclick="flip(this)">
+				<div class="contentCard">
+					<img src="/images/bean_dates/April10.jpg">
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer></footer>
+</body>
+</html>
