@@ -13,7 +13,7 @@ for (var i = 0; i < $(".day").length; i++) {
 	$($modal).append("<div class='modalContent'></div>");
 	$($modal + " .modalContent").append("<div class='title'><p>" + $($modal).attr("date") + "</p></div><div class='modalInfo'></div>");
 	$($modal + " .modalInfo").append("<div class='img'><img src=" + $($parent).children(".contentCard").children("img").attr("src") + "><p>" + $($parent).attr("name") + "</p></div>");
-	$($modal + " .modalInfo").append("<div class='table'><table><tr><td><img src='/images/icons/sun.svg' height='48px'><p>Natural Light</p></td><td><p>" + $($modal).attr("water") + "</p></td></tr><tr><td><img src='/images/icons/lightbulb.svg' height='48px'><p>Artificial Light</p></td><td><p>" + $($modal).attr("aLight") + "</p></td></tr><tr><td><img src='/images/icons/water.svg' height='48px'><p>Amount of Water</p></td><td><p>" + $($modal).attr("water") + "</p></td></tr></table></div>");
+	$($modal + " .modalInfo").append("<div class='table'><table><tr><td><img src='/images/icons/sun.svg' height='48px'><p>Natural Light</p></td><td><p>" + $($modal).attr("nLight") + "</p></td></tr><tr><td><img src='/images/icons/lightbulb.svg' height='48px'><p>Artificial Light</p></td><td><p>" + $($modal).attr("aLight") + "</p></td></tr><tr><td><img src='/images/icons/water.svg' height='48px'><p>Amount of Water</p></td><td><p>" + $($modal).attr("water") + "</p></td></tr></table></div>");
 	$($modal + " .modalInfo").append("<div class='notes'><p>" + $($modal).attr("notes") + "</p></div>");
 	$($modal).append("<p class='closeButton' onclick='closeModal(this)'>X</p>");
 	$("#content").append($($modal));
